@@ -89,12 +89,10 @@ const handleLogout = async () => {
 
 .main-content {
   flex: 1;
-  padding: 2rem;
   max-width: 1400px;
   width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
-  margin-top: 70px;
 }
 
 .fade-enter-active,

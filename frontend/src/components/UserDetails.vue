@@ -123,7 +123,6 @@ const formData = ref({
   newPassword: "",
 });
 
-// Ensure the object is reactive
 const initFormData = () => {
   formData.value = {
     name: "",
@@ -157,8 +156,8 @@ onMounted(async () => {
       newPassword: "",
     };
 
-    // Save original data for reset functionality
     originalData.value = { ...formData.value };
+    confirmPassword.value = "";
   } catch (err) {
     console.error("Error in UserDetails onMounted:", err);
 
@@ -185,11 +184,14 @@ const resetForm = () => {
   } else {
     initFormData();
   }
+  confirmPassword.value = "";
+  formData.value.currentPassword = "";
+  formData.value.newPassword = "";
   error.value = "";
 };
 
 const validatePassword = (password) => {
-  if (!password) return true; // Empty password is allowed (means keep current)
+  if (!password) return true;
 
   if (password.length < 6) {
     return "Password must be at least 6 characters";

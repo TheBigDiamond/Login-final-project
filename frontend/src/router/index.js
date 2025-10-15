@@ -31,6 +31,7 @@ const routes = [
   },
   {
     path: "/dashboard",
+    name: "dashboard",
     component: DashboardView,
     meta: {
       title: "My Profile",
@@ -39,6 +40,7 @@ const routes = [
     children: [
       {
         path: "",
+        name: "dashboard-home",
         redirect: { name: "profile" },
       },
       {

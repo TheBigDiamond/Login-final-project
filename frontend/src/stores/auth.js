@@ -82,33 +82,58 @@ export const useAuthStore = defineStore("auth", () => {
   async function register(registrationData) {
     try {
       const { firstName, lastName, email, password } = registrationData;
-      const name = `${firstName} ${lastName}`.trim();
       const registrationPayload = {
-        name: name.trim(),
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
         email: email.trim(),
         password: password,
       };
 
-      console.log("Attempting to register user:", { email, name });
+      console.log("Attempting to register user:", {
+        email,
+        firstName,
+        lastName,
+      });
 
       const response = await fetch(`${API_URL}/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Accept: "application/json",
         },
         body: JSON.stringify(registrationPayload),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || "Registration failed");
+        const errorMessage =
+          responseData.error || responseData.message || "Registration failed";
+
+        if (responseData.code === "EMAIL_EXISTS") {
+          throw new Error(
+            "This email is already registered. Please use a different email or log in."
+          );
+        }
+
+        if (responseData.missingFields) {
+          const missingFields = Object.entries(responseData.missingFields)
+            .filter(([_, isMissing]) => isMissing)
+            .map(([field]) => field);
+          if (missingFields.length > 0) {
+            throw new Error(
+              `Missing required fields: ${missingFields.join(", ")}`
+            );
+          }
+        }
+
+        throw new Error(errorMessage);
       }
 
-      const responseData = await response.json();
       console.log("Registration successful:", responseData);
 
-      const userData = responseData.user || responseData;
-      const authToken = responseData.token || responseData.access_token;
+      const userData = responseData.user;
+      const authToken = responseData.token;
 
       if (!userData || !authToken) {
         console.error("Invalid response format:", responseData);
@@ -116,35 +141,30 @@ export const useAuthStore = defineStore("auth", () => {
       }
 
       const cleanUser = {
-        id: userData.id || Date.now().toString(),
-        name: userData.name || name,
-        email: userData.email || email,
+        id: userData.id,
+        name: userData.name || `${firstName} ${lastName}`.trim(),
+        email: userData.email,
       };
 
-      // Update Pinia state
+      // Update Pinia state (same as login)
       user.value = cleanUser;
       token.value = authToken;
 
       localStorage.setItem("user", JSON.stringify(cleanUser));
       localStorage.setItem("token", authToken);
 
-      const redirectPath = returnUrl.value || "/";
+      const redirectPath = "/dashboard";
       returnUrl.value = null;
       router.push(redirectPath);
 
       return cleanUser;
     } catch (error) {
       console.error("Registration failed:", error);
-
-      try {
-        if (error.message) {
-          const errorData = JSON.parse(error.message);
-          throw new Error(errorData.message || "Registration failed");
-        }
-      } catch (e) {
-        throw new Error(error.message || "Registration failed");
+      if (error.message.includes("Failed to fetch")) {
+        throw new Error(
+          "Unable to connect to the server. Please check your internet connection and try again."
+        );
       }
-
       throw error;
     }
   }
@@ -185,7 +205,6 @@ export const useAuthStore = defineStore("auth", () => {
         throw new Error("Invalid user data received from server");
       }
 
-      // Ensure we have required user fields
       if (!userData.id) {
         userData = {
           id: response.id || Date.now().toString(),

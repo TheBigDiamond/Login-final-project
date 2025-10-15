@@ -200,7 +200,6 @@ button {
   text-decoration: underline;
 }
 
-/* Responsive Design */
 @media (max-width: 480px) {
   .login-box {
     padding: 30px 20px;
@@ -244,7 +243,6 @@ button {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* Form Validation */
 input:invalid {
   border-color: var(--error-color);
 }
