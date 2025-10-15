@@ -3,7 +3,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/TheBigDiamond/Login-final-project">
-    <img src="src/assets/logo.png" alt="Logo" width="80" height="80">
+    <img src="frontend/src/assets/logo.png" alt="Logo" width="80" height="80">
   </a>
 
 <h3 align="center">Accenture Login</h3>
@@ -61,8 +61,10 @@ To get a local copy up and running follow these simple example steps.
    ```
 3. Run the app
    ```js
-   npm start
+   npm run dev
    ```
+
+The app will create the database along with the table needed on its own (as long as the server is running), so all you have to worry about is to get to creating an user and logging in!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
